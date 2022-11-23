@@ -12,8 +12,6 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
     let exposures = get_exposures(&exif);
     let gains = get_gains(&exif);
 
-    println!("{:?}, {:?}", exposures, gains);
-
     let images: Vec<DynamicImage> = paths.par_iter().map(read_image).collect();
 
     let radiances: Vec<Vec<f32>> = images.par_iter()
