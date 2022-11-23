@@ -1,15 +1,16 @@
 use image::DynamicImage;
 use rayon::{prelude::{IntoParallelRefIterator, ParallelIterator, IndexedParallelIterator}, slice::ParallelSlice};
 
-use crate::{exif::{get_exposures, get_gains}, io::read_image};
+use crate::{exif::{get_exposures, get_gains, get_exif_data}, io::read_image};
 
 const RED_COEFFICIENT: f32 = 1.;
 const GREEN_COEFFICIENT: f32 = 1.;
 const BLUE_COEFFICIENT: f32 = 1.;
 
 pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
-    let exposures = get_exposures(paths);
-    let gains = get_gains(paths);
+    let exif = get_exif_data(paths);
+    let exposures = get_exposures(&exif);
+    let gains = get_gains(&exif);
 
     println!("{:?}, {:?}", exposures, gains);
 

@@ -1,13 +1,19 @@
-use exif::{Tag, In, Value};
+use exif::{Tag, In, Value, Exif};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-pub(crate) fn get_exposures(paths: &[String]) -> Vec<f32> {
+pub(crate) fn get_exif_data(paths: &[String]) -> Vec<Exif> {
     paths.par_iter().map(|path| {
         let file = std::fs::File::open(path).unwrap();
         let mut buf_reader = std::io::BufReader::new(&file);
         let exif_reader = exif::Reader::new();
         let exif = exif_reader.read_from_container(&mut buf_reader).unwrap();
 
+        exif
+    }).collect()
+}
+
+pub(crate) fn get_exposures(exif: &[Exif]) -> Vec<f32> {
+    exif.iter().map(|exif| {
         let exposure = match exif
             .get_field(Tag::ExposureTime, In::PRIMARY)
             .unwrap()
@@ -21,13 +27,8 @@ pub(crate) fn get_exposures(paths: &[String]) -> Vec<f32> {
     }).collect()
 }
 
-pub(crate) fn get_gains(paths: &[String]) -> Vec<f32> {
-    paths.par_iter().map(|path| {
-        let file = std::fs::File::open(path).unwrap();
-        let mut buf_reader = std::io::BufReader::new(&file);
-        let exif_reader = exif::Reader::new();
-        let exif = exif_reader.read_from_container(&mut buf_reader).unwrap();
-
+pub(crate) fn get_gains(exif: &[Exif]) -> Vec<f32> {
+    exif.iter().map(|exif| {
         let gain = match exif
             .get_field(Tag::ISOSpeed, In::PRIMARY)
             .unwrap_or(
