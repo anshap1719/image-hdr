@@ -1,14 +1,24 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use image::{DynamicImage, ImageBuffer, GenericImageView};
+use io::read_image;
+use poisson::calculate_poisson_estimate;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod io;
+mod exif;
+mod poisson;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn hdr_merge_images(paths: Vec<String>) -> DynamicImage {
+    let image = read_image(&paths.first().unwrap());
+    let (width, height) = image.dimensions();
+
+    drop(image);
+
+    let phi = calculate_poisson_estimate(&paths);
+
+    DynamicImage::ImageRgb32F(
+        ImageBuffer::from_vec(
+            width,
+            height,
+            phi.to_vec()
+        ).unwrap()
+    )
 }
