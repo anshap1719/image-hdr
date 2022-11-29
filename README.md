@@ -34,3 +34,7 @@ stretched
 ## Contributing
 
 Bug reports and pull requests welcome at https://github.com/anshap1719/image-hdr
+
+## Citations
+
+-   Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration by Param Hanji, Fangcheng Zhong, and Rafa l K. Mantiuk (https://www.cl.cam.ac.uk/~rkm38/pdfs/hanji2020_noise_aware_HDR_merging.pdf)
