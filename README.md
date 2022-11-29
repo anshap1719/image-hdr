@@ -31,6 +31,22 @@ stretched
     .unwrap();
 ```
 
+## Samples
+
+### Given the following 3 exposures:
+
+![alt "1/640s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00001+Large.jpeg)
+![alt "1/4000s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00002+Large.jpeg)
+![alt "1/80s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00003+Large.jpeg)
+
+### Resulting unprocessed image:
+
+![alt "Merged image"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/hdr_merged+Large.jpeg)
+
+### After basic processing (Levels and Contrast):
+
+![alt "Processed image"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/Processed+Large.jpeg)
+
 ## Contributing
 
 Bug reports and pull requests welcome at https://github.com/anshap1719/image-hdr
