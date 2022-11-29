@@ -2,8 +2,18 @@
 name = "image-hdr"
 version = "0.1.0"
 edition = "2021"
+authors = "Anshul Sanghi <contact@anshulsanghi.tech>"
+description = "An implementation of HDR Radiance Estimation using Poisson Photon Noise Estimator for creating HDR image from a set of images"
+homepage = "https://github.com/anshap1719/image-hdr"
+repository = "https://github.com/anshap1719/image-hdr"
+keywords = ["image", "hdr", "merge"]
+categories = ["multimedia"]
+license = "Apache-2.0"
+readme = "./README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
+bench = false
 
 [dependencies]
 image = "0.24"
