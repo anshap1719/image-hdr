@@ -8,6 +8,7 @@ fn scale_pixel(pixel: &f32, min: f32, max: f32) -> f32 {
     (pixel - min) * (1. / (max - min))
 }
 
+/// Contrast stretch (normalize) a given image.
 pub fn apply_histogram_stretch(image: &DynamicImage) -> DynamicImage {
     let (width, height) = image.dimensions();
 
