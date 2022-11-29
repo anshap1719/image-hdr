@@ -2,7 +2,7 @@
 name = "image-hdr"
 version = "0.1.0"
 edition = "2021"
-authors = "Anshul Sanghi <contact@anshulsanghi.tech>"
+authors = ["Anshul Sanghi <contact@anshulsanghi.tech>"]
 description = "An implementation of HDR Radiance Estimation using Poisson Photon Noise Estimator for creating HDR image from a set of images"
 homepage = "https://github.com/anshap1719/image-hdr"
 repository = "https://github.com/anshap1719/image-hdr"
