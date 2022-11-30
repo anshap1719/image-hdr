@@ -1,8 +1,5 @@
 use image::DynamicImage;
-use rayon::{
-    prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator},
-    slice::ParallelSlice,
-};
+use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use crate::{
     exif::{get_exif_data, get_exposures, get_gains},
@@ -40,7 +37,7 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
         .map(|((image, exposure), gain)| {
             let pixels = image.to_rgb32f().into_raw();
             let scaled_radiances: Vec<f32> = pixels
-                .par_chunks_exact(3)
+                .chunks_exact(3)
                 .flat_map(|channels| {
                     if let [r, g, b] = channels {
                         let scaling_factor = exposure * gain;
@@ -67,8 +64,9 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
         |acc, (index, radiances)| {
             acc.par_iter()
                 .zip(radiances)
-                .map(|(previous, current)| (previous + current) * exposures[index])
-                .map(|item| item / sum_exposures)
+                .map(|(previous, current)| {
+                    ((previous + current) * exposures[index]) / sum_exposures
+                })
                 .collect()
         },
     );
