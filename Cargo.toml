@@ -19,11 +19,5 @@ bench = false
 image = "0.24"
 rayon = "1.5"
 kamadak-exif = "0.5.5"
-
-[dependencies.rawloader]
-version = "0.37"
-path = "../rawloader"
-
-[dependencies.imagepipe]
-version = "0.5"
-path = "../imagepipe"
+rawloader = "0.37"
+imagepipe = "0.5"
