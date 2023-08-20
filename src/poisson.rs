@@ -1,9 +1,14 @@
+//! An implementation of HDR merging via "Poisson Photon Noise Estimator" as introduced in
+//! [Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration](https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf)
+
 use image::DynamicImage;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
+use crate::error::UnknownError;
 use crate::{
     exif::{get_exif_data, get_exposures, get_gains},
     io::read_image,
+    Error,
 };
 
 const RED_COEFFICIENT: f32 = 1.;
@@ -16,21 +21,22 @@ const BLUE_COEFFICIENT: f32 = 1.;
 /// supplied images.
 ///
 /// For more details on the algorithm used, please
-/// refer to https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf
+/// refer to [Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration](https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf)
+///
 /// specifically the section about "Poisson Photon Noise Estimator"
 ///
-/// # Panics
+/// # Errors
 /// If supplied image is not an RGB image. Non RGB images
 /// include images with alpha channel, grayscale images,
 /// and images with other color encodings (like CMYK).
-pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
-    let exif = get_exif_data(paths);
-    let exposures = get_exposures(&exif);
-    let gains = get_gains(&exif);
+pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Result<Vec<f32>, Error> {
+    let exif = get_exif_data(paths)?;
+    let exposures = get_exposures(&exif)?;
+    let gains = get_gains(&exif)?;
 
-    let images: Vec<DynamicImage> = paths.par_iter().map(read_image).collect();
+    let images: Result<Vec<DynamicImage>, Error> = paths.par_iter().map(read_image).collect();
 
-    let radiances: Vec<Vec<f32>> = images
+    let radiances: Vec<Vec<f32>> = images?
         .par_iter()
         .zip(&exposures)
         .zip(gains)
@@ -60,7 +66,12 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
     let sum_exposures: f32 = exposures.iter().sum();
 
     let phi: Vec<f32> = radiances.iter().enumerate().fold(
-        radiances.first().unwrap().to_vec(),
+        radiances
+            .first()
+            .ok_or(Error::UnknownError(UnknownError::from(
+                "Invalid radiances".to_string(),
+            )))?
+            .clone(),
         |acc, (index, radiances)| {
             acc.par_iter()
                 .zip(radiances)
@@ -71,5 +82,5 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Vec<f32> {
         },
     );
 
-    phi
+    Ok(phi)
 }

@@ -1,3 +1,5 @@
+//! Collection of utility functions for various use cases.
+
 /// Transposes a 2D Vector (Vec<Vec<Item>>)
 ///
 /// # Examples

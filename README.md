@@ -6,7 +6,7 @@ This is a rust library which implements the HDR merging algorithm for camera ima
 
 The library is still in early stages of development, but aims to provide a crate that can handle all HDR merging needs. Towards that end, the following todos are the top priority:
 
--   Proper error handling – instead of panics, return errors that can be used by users.
+-   Proper error handling – instead of panics, return errors that can be used by users.
 -   Ability to provide exposure times and gains manually when metadata is unavailable.
 -   Tone mapping algorithm implementations.
 -   Improve performance.

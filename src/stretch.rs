@@ -1,15 +1,21 @@
+//! Apply basic histogram stretch to a linear image to make it viewable.
+
+use crate::Error;
+use crate::UnknownError;
 use image::{DynamicImage, GenericImageView, ImageBuffer};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::util::transpose_vec;
 
-#[inline(always)]
-fn scale_pixel(pixel: &f32, min: f32, max: f32) -> f32 {
+fn scale_pixel(pixel: f32, min: f32, max: f32) -> f32 {
     (pixel - min) * (1. / (max - min))
 }
 
 /// Contrast stretch (normalize) a given image.
-pub fn apply_histogram_stretch(image: &DynamicImage) -> DynamicImage {
+///
+/// # Errors
+/// - if image cannot be constructed from processed pixels.
+pub fn apply_histogram_stretch(image: &DynamicImage) -> Result<DynamicImage, Error> {
     let (width, height) = image.dimensions();
 
     let image_buffer = image.to_rgb32f();
@@ -25,12 +31,12 @@ pub fn apply_histogram_stretch(image: &DynamicImage) -> DynamicImage {
     let channel_wise_pixels: Vec<Vec<f32>> = channel_wise_pixels
         .par_iter()
         .map(|channel| {
-            let input_max_value = channel.iter().copied().reduce(f32::max).unwrap();
-            let input_min_value = channel.iter().copied().reduce(f32::min).unwrap();
+            let input_max_value = channel.iter().copied().reduce(f32::max).unwrap_or(1.);
+            let input_min_value = channel.iter().copied().reduce(f32::min).unwrap_or(0.);
 
             let pixels: Vec<f32> = channel
                 .iter()
-                .map(|pixel| scale_pixel(pixel, input_min_value, input_max_value))
+                .map(|pixel| scale_pixel(*pixel, input_min_value, input_max_value))
                 .collect();
 
             pixels
@@ -43,5 +49,11 @@ pub fn apply_histogram_stretch(image: &DynamicImage) -> DynamicImage {
         .copied()
         .collect();
 
-    DynamicImage::ImageRgb32F(ImageBuffer::from_vec(width, height, pixels_buf).unwrap())
+    Ok(DynamicImage::ImageRgb32F(
+        ImageBuffer::from_vec(width, height, pixels_buf).ok_or(Error::UnknownError(
+            UnknownError::from(
+                "Failed to create image buffer, buffer is not large enough".to_string(),
+            ),
+        ))?,
+    ))
 }
