@@ -1,6 +1,6 @@
 [package]
 name = "image-hdr"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Anshul Sanghi <contact@anshulsanghi.tech>"]
 description = "An implementation of HDR Radiance Estimation using Poisson Photon Noise Estimator for creating HDR image from a set of images"
