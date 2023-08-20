@@ -6,7 +6,6 @@ This is a rust library which implements the HDR merging algorithm for camera ima
 
 The library is still in early stages of development, but aims to provide a crate that can handle all HDR merging needs. Towards that end, the following todos are the top priority:
 
--   Ability to provide exposure times and gains manually when metadata is unavailable.
 -   Tone mapping algorithm implementations.
 -   Improve performance.
 
@@ -15,7 +14,7 @@ The library is still in early stages of development, but aims to provide a crate
 -   image-rs: Uses DynamicImage as the output format and storage format between calculations.
 -   rawloader: For supporting RAW image formats.
 -   rayon: For doing point calculations in parallel.
--   kamadak-exif: For getting image's metadata, specifically eposure time and gain (ISO).
+-   kamadak-exif: For getting image's metadata, specifically exposure time and gain (ISO).
 
 ## Usage
 
