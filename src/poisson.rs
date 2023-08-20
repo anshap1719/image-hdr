@@ -1,15 +1,11 @@
 //! An implementation of HDR merging via "Poisson Photon Noise Estimator" as introduced in
 //! [Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration](https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf)
 
-use image::DynamicImage;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use crate::error::UnknownError;
-use crate::{
-    exif::{get_exif_data, get_exposures, get_gains},
-    io::read_image,
-    Error,
-};
+use crate::input::HDRInput;
+use crate::Error;
 
 const RED_COEFFICIENT: f32 = 1.;
 const GREEN_COEFFICIENT: f32 = 1.;
@@ -29,24 +25,16 @@ const BLUE_COEFFICIENT: f32 = 1.;
 /// If supplied image is not an RGB image. Non RGB images
 /// include images with alpha channel, grayscale images,
 /// and images with other color encodings (like CMYK).
-pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Result<Vec<f32>, Error> {
-    let exif = get_exif_data(paths)?;
-    let exposures = get_exposures(&exif)?;
-    let gains = get_gains(&exif)?;
-
-    let images: Result<Vec<DynamicImage>, Error> = paths.par_iter().map(read_image).collect();
-
-    let radiances: Vec<Vec<f32>> = images?
+pub(crate) fn calculate_poisson_estimate(inputs: &[HDRInput]) -> Result<Vec<f32>, Error> {
+    let radiances: Vec<Vec<f32>> = inputs
         .par_iter()
-        .zip(&exposures)
-        .zip(gains)
-        .map(|((image, exposure), gain)| {
-            let pixels = image.to_rgb32f().into_raw();
+        .map(|input| {
+            let pixels = input.get_image().to_rgb32f().into_raw();
             let scaled_radiances: Vec<f32> = pixels
                 .chunks_exact(3)
                 .flat_map(|channels| {
                     if let [r, g, b] = channels {
-                        let scaling_factor = exposure * gain;
+                        let scaling_factor = input.get_exposure() * input.get_gain();
 
                         [
                             r / (scaling_factor * RED_COEFFICIENT),
@@ -63,7 +51,7 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Result<Vec<f32>, E
         })
         .collect();
 
-    let sum_exposures: f32 = exposures.iter().sum();
+    let sum_exposures: f32 = inputs.iter().map(HDRInput::get_exposure).sum();
 
     let phi: Vec<f32> = radiances.iter().enumerate().fold(
         radiances
@@ -76,7 +64,8 @@ pub(crate) fn calculate_poisson_estimate(paths: &[String]) -> Result<Vec<f32>, E
             acc.par_iter()
                 .zip(radiances)
                 .map(|(previous, current)| {
-                    ((previous + current) * exposures[index]) / sum_exposures
+                    ((previous + current) * inputs.get(index).unwrap().get_exposure())
+                        / sum_exposures
                 })
                 .collect()
         },
