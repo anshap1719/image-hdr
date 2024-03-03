@@ -33,7 +33,7 @@ pub use error::Error;
 /// - If image list is empty
 /// - If supplied image is not an RGB image. Non RGB images include images with alpha channel, grayscale images, and images with other color encodings (like CMYK).
 /// - If images are of different dimensions.
-pub fn hdr_merge_images(inputs: &HDRInputList) -> Result<DynamicImage, Error> {
+pub fn hdr_merge_images(inputs: &mut HDRInputList) -> Result<DynamicImage, Error> {
     if inputs.len() < 2 {
         return Err(Error::InputError {
             parameter_name: "paths".to_string(),
@@ -51,7 +51,7 @@ pub fn hdr_merge_images(inputs: &HDRInputList) -> Result<DynamicImage, Error> {
 
     let (width, height) = image.dimensions();
 
-    let phi = calculate_poisson_estimate(inputs.as_slice())?;
+    let phi = calculate_poisson_estimate(inputs.as_slice_mut())?;
 
     Ok(DynamicImage::ImageRgb32F(
         ImageBuffer::from_vec(width, height, phi.clone()).ok_or(Error::UnknownError(

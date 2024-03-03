@@ -94,6 +94,12 @@ impl HDRInput {
     pub fn get_image(&self) -> &DynamicImage {
         &self.image
     }
+
+    /// Get underlying image data for the input item as mutable
+    #[must_use]
+    pub fn get_image_mut(&mut self) -> &mut DynamicImage {
+        &mut self.image
+    }
 }
 
 impl TryFrom<String> for HDRInput {
@@ -127,6 +133,12 @@ impl HDRInputList {
     #[must_use]
     pub fn as_slice(&self) -> &[HDRInput] {
         &self.0
+    }
+
+    /// Get list of [`HDRInput`] as a mutable slice.
+    #[must_use]
+    pub fn as_slice_mut(&mut self) -> &mut [HDRInput] {
+        &mut self.0
     }
 
     /// Returns the number of elements in the list
