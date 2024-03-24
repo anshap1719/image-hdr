@@ -16,9 +16,9 @@ crate-type = ["cdylib", "rlib"]
 bench = false
 
 [dependencies]
-image = "0.24"
-rayon = "1.7"
+image = "0.25.0"
+rayon = "1.10"
 kamadak-exif = "0.5.5"
 rawloader = "0.37"
 imagepipe = "0.5"
-thiserror = "1.0.47"
+thiserror = "1.0.58"
