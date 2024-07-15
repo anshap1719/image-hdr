@@ -1,6 +1,7 @@
 //! Error definitions for the library
 
 use image::ImageError;
+#[cfg(feature = "read-raw-image")]
 use rawloader::RawLoaderError;
 use std::fmt::{Debug, Display, Formatter};
 use std::io;
@@ -43,7 +44,12 @@ impl From<String> for UnknownError {
 pub enum Error {
     /// Represents image or raw image decoding error
     #[error("Unable to decode raw image")]
-    DecodeError(#[from] RawLoaderError),
+    #[cfg_attr(not(feature = "read-raw-image"), non_exhaustive)]
+    DecodeError(
+        #[from]
+        #[cfg(feature = "read-raw-image")]
+        RawLoaderError,
+    ),
     /// Represents raw image pipeline error
     #[error("Unable to decode raw image")]
     RawPipeline(#[from] RawPipelineError),
