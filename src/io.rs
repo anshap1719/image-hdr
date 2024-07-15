@@ -10,8 +10,16 @@ use image::DynamicImage;
 ///
 /// # Errors
 /// If image cannot be read
-pub(crate) fn read_image(data: &[u8]) -> Result<DynamicImage, Error> {
-    match image::load_from_memory(data) {
+pub(crate) fn read_image(
+    data: &[u8],
+    format: Option<image::ImageFormat>,
+) -> Result<DynamicImage, Error> {
+    let load_result = match format {
+        Some(format) => image::load_from_memory_with_format(data, format),
+        None => image::load_from_memory(data),
+    };
+
+    match load_result {
         Ok(image) => Ok(image),
         Err(_err) => {
             #[cfg(not(feature = "read-raw-image"))]

@@ -57,7 +57,8 @@ impl HDRInput {
         gain: f32,
     ) -> Result<Self, Error> {
         let data = std::fs::read(path)?;
-        let image = read_image(&data)?;
+        let format = image::ImageFormat::from_path(path).ok();
+        let image = read_image(&data, format)?;
 
         Self::with_image(image, exposure, gain)
     }
@@ -122,7 +123,8 @@ impl TryFrom<&Path> for HDRInput {
 
     fn try_from(value: &Path) -> Result<Self, Self::Error> {
         let data = std::fs::read(value)?;
-        let image = read_image(&data)?;
+        let format = image::ImageFormat::from_path(value).ok();
+        let image = read_image(&data, format)?;
         let exif = get_exif_data(&data)?;
         let exposure = get_exposures(&exif)?;
         let gain = get_gains(&exif)?;
