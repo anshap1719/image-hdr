@@ -174,7 +174,7 @@ impl<P: AsRef<Path> + Sync> TryFrom<&[P]> for HDRInputList {
             value
                 .par_iter()
                 .map(|value| -> Result<HDRInput, Self::Error> {
-                    Ok(HDRInput::try_from(value.as_ref())?)
+                    HDRInput::try_from(value.as_ref())
                 })
                 .collect::<Result<Vec<HDRInput>, Self::Error>>()?,
         ))

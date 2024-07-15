@@ -4,6 +4,9 @@ use crate::Error;
 use exif::{Exif, In, Tag, Value};
 
 /// Extract the exif information from the bytes of an image file
+///
+/// # Errors
+/// - failed to extract exif data
 pub fn get_exif_data(data: &[u8]) -> Result<Exif, Error> {
     let mut buf_reader = std::io::Cursor::new(data);
     let exif_reader = exif::Reader::new();
@@ -13,6 +16,9 @@ pub fn get_exif_data(data: &[u8]) -> Result<Exif, Error> {
 }
 
 /// Extract the exposure time in seconds from exif information
+///
+/// # Errors
+/// - failed to exposure from exif data
 pub fn get_exposures(exif: &Exif) -> Result<f32, Error> {
     match exif
         .get_field(Tag::ExposureTime, In::PRIMARY)
@@ -26,7 +32,10 @@ pub fn get_exposures(exif: &Exif) -> Result<f32, Error> {
     }
 }
 
-/// Extract the gain from exif information
+/// Extract the gains from exif information
+///
+/// # Errors
+/// - failed to gains from exif data
 #[allow(clippy::cast_precision_loss)]
 pub fn get_gains(exif: &Exif) -> Result<f32, Error> {
     match exif
