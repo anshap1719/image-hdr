@@ -23,7 +23,7 @@ impl HDRInput {
     ///
     /// * `path`: Path to file
     ///
-    /// returns: Result<HDRInput, Error>
+    /// returns: `Result<HDRInput, Error>`
     ///
     /// # Errors
     ///
@@ -43,7 +43,7 @@ impl HDRInput {
     /// * `exposure`:
     /// * `gain`:
     ///
-    /// returns: Result<HDRInput, Error>
+    /// returns: `Result<HDRInput, Error>`
     ///
     /// # Errors
     ///
@@ -67,7 +67,7 @@ impl HDRInput {
     /// * `exposure`:
     /// * `gain`:
     ///
-    /// returns: Result<HDRInput, Error>
+    /// returns: `Result<HDRInput, Error>`
     ///
     /// # Errors
     ///
