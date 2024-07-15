@@ -15,7 +15,7 @@ use image::{DynamicImage, GenericImageView, ImageBuffer};
 use poisson::calculate_poisson_estimate;
 
 pub mod error;
-mod exif;
+pub mod exif;
 pub mod input;
 mod io;
 mod poisson;

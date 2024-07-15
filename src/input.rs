@@ -5,6 +5,7 @@ use crate::io::read_image;
 use crate::Error;
 use image::DynamicImage;
 use rayon::prelude::*;
+use std::path::Path;
 use std::time::Duration;
 
 /// Base input item that is used to process the HDR merge
@@ -29,8 +30,8 @@ impl HDRInput {
     ///
     /// - If image cannot be opened
     /// - If image doesn't contain EXIF metadata for exposure and/or gain.
-    pub fn new(path: &String) -> Result<Self, crate::Error> {
-        let new_input = Self::try_from(path.to_string())?;
+    pub fn new(path: &Path) -> Result<Self, crate::Error> {
+        let new_input = Self::try_from(path)?;
 
         Ok(new_input)
     }
@@ -51,11 +52,12 @@ impl HDRInput {
     /// - invalid gain
     /// - invalid exposure duration
     pub fn with_exposure_and_gain(
-        path: &String,
+        path: &Path,
         exposure: Duration,
         gain: f32,
     ) -> Result<Self, Error> {
-        let image = read_image(path)?;
+        let data = std::fs::read(path)?;
+        let image = read_image(&data)?;
 
         Self::with_image(image, exposure, gain)
     }
@@ -115,12 +117,13 @@ impl HDRInput {
     }
 }
 
-impl TryFrom<String> for HDRInput {
+impl TryFrom<&Path> for HDRInput {
     type Error = Error;
 
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        let image = read_image(&value)?;
-        let exif = get_exif_data(&value)?;
+    fn try_from(value: &Path) -> Result<Self, Self::Error> {
+        let data = std::fs::read(value)?;
+        let image = read_image(&data)?;
+        let exif = get_exif_data(&data)?;
         let exposure = get_exposures(&exif)?;
         let gain = get_gains(&exif)?;
 
@@ -163,24 +166,15 @@ impl From<Vec<HDRInput>> for HDRInputList {
     }
 }
 
-impl TryFrom<&[String]> for HDRInputList {
+impl<P: AsRef<Path> + Sync> TryFrom<&[P]> for HDRInputList {
     type Error = Error;
 
-    fn try_from(value: &[String]) -> Result<Self, Self::Error> {
+    fn try_from(value: &[P]) -> Result<Self, Self::Error> {
         Ok(HDRInputList(
             value
                 .par_iter()
                 .map(|value| -> Result<HDRInput, Self::Error> {
-                    let image = read_image(value)?;
-                    let exif = get_exif_data(value)?;
-                    let exposure = get_exposures(&exif)?;
-                    let gain = get_gains(&exif)?;
-
-                    Ok(HDRInput {
-                        image,
-                        exposure,
-                        gain,
-                    })
+                    Ok(HDRInput::try_from(value.as_ref())?)
                 })
                 .collect::<Result<Vec<HDRInput>, Self::Error>>()?,
         ))

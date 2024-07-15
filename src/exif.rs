@@ -3,16 +3,17 @@
 use crate::Error;
 use exif::{Exif, In, Tag, Value};
 
-pub(crate) fn get_exif_data(path: &String) -> Result<Exif, Error> {
-    let file = std::fs::File::open(path)?;
-    let mut buf_reader = std::io::BufReader::new(&file);
+/// Extract the exif information from the bytes of an image file
+pub fn get_exif_data(data: &[u8]) -> Result<Exif, Error> {
+    let mut buf_reader = std::io::Cursor::new(data);
     let exif_reader = exif::Reader::new();
     let exif = exif_reader.read_from_container(&mut buf_reader)?;
 
     Ok(exif)
 }
 
-pub(crate) fn get_exposures(exif: &Exif) -> Result<f32, Error> {
+/// Extract the exposure time in seconds from exif information
+pub fn get_exposures(exif: &Exif) -> Result<f32, Error> {
     match exif
         .get_field(Tag::ExposureTime, In::PRIMARY)
         .ok_or(Error::ExifError(exif::Error::NotFound(
@@ -25,8 +26,9 @@ pub(crate) fn get_exposures(exif: &Exif) -> Result<f32, Error> {
     }
 }
 
+/// Extract the gain from exif information
 #[allow(clippy::cast_precision_loss)]
-pub(crate) fn get_gains(exif: &Exif) -> Result<f32, Error> {
+pub fn get_gains(exif: &Exif) -> Result<f32, Error> {
     match exif
         .get_field(Tag::ISOSpeed, In::PRIMARY)
         .unwrap_or(
