@@ -24,7 +24,7 @@ pub fn apply_histogram_stretch(image: &DynamicImage) -> Result<DynamicImage, Err
     let pixel_wise_channels = image_buffer
         .chunks_exact(3)
         .map(|chunk| -> Vec<f32> { chunk.to_vec() })
-        .collect();
+        .collect::<Vec<_>>();
 
     let channel_wise_pixels = transpose_vec(&pixel_wise_channels);
 

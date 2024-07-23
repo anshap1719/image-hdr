@@ -23,7 +23,7 @@ impl HDRInput {
     ///
     /// * `path`: Path to file
     ///
-    /// returns: Result<HDRInput, Error>
+    /// returns: `Result<HDRInput, Error>`
     ///
     /// # Errors
     ///
@@ -43,11 +43,13 @@ impl HDRInput {
     /// * `exposure`:
     /// * `gain`:
     ///
-    /// returns: Result<HDRInput, Error>
+    /// returns: `Result<HDRInput, Error>`
     ///
     /// # Errors
     ///
     /// - If image cannot be opened
+    /// - invalid gain
+    /// - invalid exposure duration
     pub fn with_exposure_and_gain(
         path: &String,
         exposure: Duration,
@@ -55,6 +57,23 @@ impl HDRInput {
     ) -> Result<Self, Error> {
         let image = read_image(path)?;
 
+        Self::with_image(image, exposure, gain)
+    }
+
+    ///
+    /// # Arguments
+    ///
+    /// * `image`:
+    /// * `exposure`:
+    /// * `gain`:
+    ///
+    /// returns: `Result<HDRInput, Error>`
+    ///
+    /// # Errors
+    ///
+    /// - invalid gain
+    /// - invalid exposure duration
+    pub fn with_image(image: DynamicImage, exposure: Duration, gain: f32) -> Result<Self, Error> {
         if gain.is_infinite() || gain.is_nan() || gain <= 0. {
             return Err(Error::InputError {
                 parameter_name: "gain".to_string(),
@@ -105,11 +124,7 @@ impl TryFrom<String> for HDRInput {
         let exposure = get_exposures(&exif)?;
         let gain = get_gains(&exif)?;
 
-        Ok(Self {
-            image,
-            exposure,
-            gain,
-        })
+        Self::with_image(image, Duration::from_secs_f32(exposure), gain)
     }
 }
 
@@ -139,6 +154,12 @@ impl HDRInputList {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+}
+
+impl From<Vec<HDRInput>> for HDRInputList {
+    fn from(value: Vec<HDRInput>) -> Self {
+        Self(value)
     }
 }
 
