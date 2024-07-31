@@ -1,6 +1,7 @@
 //! Input type for processing HDR merge
 
 use crate::exif::{get_exif_data, get_exposures, get_gains};
+use crate::extensions::NDArrayBuffer;
 use crate::io::read_image;
 use crate::Error;
 use image::DynamicImage;
@@ -93,35 +94,7 @@ impl HDRInput {
             });
         }
 
-        let buffer = match image {
-            DynamicImage::ImageLuma8(_)
-            | DynamicImage::ImageLumaA8(_)
-            | DynamicImage::ImageLuma16(_)
-            | DynamicImage::ImageLumaA16(_) => {
-                let mut buffer =
-                    Array3::<f32>::zeros((image.height() as usize, image.width() as usize, 1));
-
-                for (x, y, pixel) in image.to_luma32f().enumerate_pixels() {
-                    buffer[[y as usize, x as usize, 0]] = pixel.0[0];
-                }
-
-                buffer
-            }
-            _ => {
-                let mut buffer =
-                    Array3::<f32>::zeros((image.height() as usize, image.width() as usize, 3));
-
-                for (x, y, pixel) in image.to_rgb32f().enumerate_pixels() {
-                    let [red, green, blue] = pixel.0;
-
-                    buffer[[y as usize, x as usize, 0]] = red;
-                    buffer[[y as usize, x as usize, 1]] = green;
-                    buffer[[y as usize, x as usize, 2]] = blue;
-                }
-
-                buffer
-            }
-        };
+        let buffer = image.to_nd_array_buffer();
 
         Ok(Self {
             buffer,

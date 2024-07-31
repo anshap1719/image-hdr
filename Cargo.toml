@@ -15,10 +15,6 @@ readme = "./README.md"
 crate-type = ["cdylib", "rlib"]
 bench = false
 
-[[bin]]
-name = "hdr"
-path = "src/main.rs"
-
 [dependencies]
 image = "0.25.0"
 rayon = "1.10"

@@ -11,18 +11,18 @@
 #![allow(clippy::multiple_crate_versions)]
 #![allow(clippy::module_name_repetitions)]
 
-use image::{DynamicImage, ImageBuffer, Luma, Rgb};
+use image::DynamicImage;
 use poisson::calculate_poisson_estimate;
 
 pub mod error;
 pub mod exif;
+pub mod extensions;
 pub mod input;
 mod io;
 mod poisson;
 pub mod stretch;
-mod util;
 
-use crate::error::UnknownError;
+use crate::extensions::NDArrayBuffer;
 use crate::input::HDRInputList;
 pub use error::Error;
 
@@ -42,30 +42,6 @@ pub fn hdr_merge_images(inputs: &mut HDRInputList) -> Result<DynamicImage, Error
     }
 
     let phi = calculate_poisson_estimate(inputs.as_slice_mut());
-    let dimensions = phi.dim();
 
-    let output = if let (height, width, 1) = dimensions {
-        let mut result = ImageBuffer::<Luma<u16>, Vec<u16>>::new(width as u32, height as u32);
-        for (x, y, pixel) in result.enumerate_pixels_mut() {
-            let intensity = phi[[y as usize, x as usize, 0]] * u16::MAX as f32;
-            *pixel = Luma([intensity as u16]);
-        }
-
-        DynamicImage::ImageLuma16(result)
-    } else if let (height, width, 3) = dimensions {
-        let mut result = ImageBuffer::<Rgb<f32>, Vec<f32>>::new(width as u32, height as u32);
-        for (x, y, pixel) in result.enumerate_pixels_mut() {
-            let red = phi[[y as usize, x as usize, 0]];
-            let green = phi[[y as usize, x as usize, 1]];
-            let blue = phi[[y as usize, x as usize, 2]];
-
-            *pixel = Rgb([red, green, blue]);
-        }
-
-        DynamicImage::ImageRgb32F(result)
-    } else {
-        panic!("Unexpected dimensions encountered");
-    };
-
-    Ok(output)
+    Ok(DynamicImage::from_nd_array_buffer(phi))
 }
