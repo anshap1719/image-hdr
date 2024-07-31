@@ -15,9 +15,9 @@ readme = "./README.md"
 crate-type = ["cdylib", "rlib"]
 bench = false
 
-[features]
-default = ["read-raw-image"]
-read-raw-image = ["dep:imagepipe", "dep:rawloader"]
+[[bin]]
+name = "hdr"
+path = "src/main.rs"
 
 [dependencies]
 image = "0.25.0"
@@ -26,7 +26,12 @@ kamadak-exif = "0.5.5"
 rawloader = { version = "0.37", optional = true }
 imagepipe = { version = "0.5", optional = true }
 thiserror = "1.0.58"
+ndarray = { version = "0.15.6", features = ["rayon"] }
 
 [dev-dependencies]
 reqwest = { version = "0.12.5", features = ["blocking"] }
 image = { version = "0.25.0", features = ["jpeg"] }
+
+[features]
+default = ["read-raw-image"]
+read-raw-image = ["dep:imagepipe", "dep:rawloader"]

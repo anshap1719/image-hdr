@@ -1,11 +1,10 @@
 //! Apply basic histogram stretch to a linear image to make it viewable.
 
+use crate::util::transpose_vec;
 use crate::Error;
 use crate::UnknownError;
 use image::{DynamicImage, GenericImageView, ImageBuffer};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-
-use crate::util::transpose_vec;
 
 fn scale_pixel(pixel: f32, min: f32, max: f32) -> f32 {
     (pixel - min) * (1. / (max - min))

@@ -1,7 +1,9 @@
 //! An implementation of HDR merging via "Poisson Photon Noise Estimator" as introduced in
 //! [Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration](https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf)
 
-use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use ndarray::array;
+use ndarray::prelude::*;
+use rayon::prelude::*;
 
 use crate::error::UnknownError;
 use crate::input::HDRInput;
@@ -25,51 +27,42 @@ const BLUE_COEFFICIENT: f32 = 1.;
 /// If supplied image is not an RGB image. Non RGB images
 /// include images with alpha channel, grayscale images,
 /// and images with other color encodings (like CMYK).
-pub(crate) fn calculate_poisson_estimate(inputs: &[HDRInput]) -> Result<Vec<f32>, Error> {
-    let radiances: Vec<Vec<f32>> = inputs
-        .par_iter()
-        .map(|input| {
-            let pixels = input.get_image().to_rgb32f().into_raw();
-            let scaled_radiances: Vec<f32> = pixels
-                .chunks_exact(3)
-                .flat_map(|channels| {
-                    if let [r, g, b] = channels {
-                        let scaling_factor = input.get_exposure() * input.get_gain();
+pub(crate) fn calculate_poisson_estimate(inputs: &mut [HDRInput]) -> Array3<f32> {
+    inputs.par_iter_mut().for_each(|input| {
+        let scaling_factor = input.get_exposure() * input.get_gain();
+        let mut input_buffer = input.get_buffer_mut();
 
-                        [
-                            r / (scaling_factor * RED_COEFFICIENT),
-                            g / (scaling_factor * GREEN_COEFFICIENT),
-                            b / (scaling_factor * BLUE_COEFFICIENT),
-                        ]
-                    } else {
-                        panic!("Invalid channels");
-                    }
-                })
-                .collect();
+        if let (_, _, 1) = input_buffer.dim() {
+            *input_buffer /= scaling_factor;
+        } else if let (_, _, 3) = input_buffer.dim() {
+            *input_buffer /= &array![[[
+                scaling_factor * RED_COEFFICIENT,
+                scaling_factor * GREEN_COEFFICIENT,
+                scaling_factor * BLUE_COEFFICIENT
+            ]]];
+        } else {
+            panic!("Unexpected scaling matrix encountered.")
+        }
+    });
 
-            scaled_radiances
-        })
-        .collect();
-
+    let shape = inputs.first().unwrap().get_buffer().dim();
     let sum_exposures: f32 = inputs.iter().map(HDRInput::get_exposure).sum();
 
-    let phi: Vec<f32> = radiances.iter().enumerate().fold(
-        radiances
-            .first()
-            .ok_or(Error::UnknownError(UnknownError::from(
-                "Invalid radiances".to_string(),
-            )))?
-            .clone(),
-        |acc, (index, radiances)| {
-            acc.par_iter()
-                .zip(radiances)
-                .map(|(previous, current)| {
-                    ((previous + current) * inputs.get(index).unwrap().get_exposure())
-                        / sum_exposures
-                })
-                .collect()
-        },
-    );
+    let normalized_radiances = inputs
+        .par_iter()
+        .map(|input| {
+            let mut radiance = input.get_buffer().clone();
+            let exposure = input.get_exposure();
 
-    Ok(phi)
+            radiance *= exposure / sum_exposures;
+
+            radiance
+        })
+        .into_par_iter()
+        .reduce(
+            || Array3::<f32>::zeros(shape),
+            |acc, radiance| acc + radiance,
+        );
+
+    normalized_radiances
 }

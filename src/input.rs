@@ -4,6 +4,7 @@ use crate::exif::{get_exif_data, get_exposures, get_gains};
 use crate::io::read_image;
 use crate::Error;
 use image::DynamicImage;
+use ndarray::Array3;
 use rayon::prelude::*;
 use std::path::Path;
 use std::time::Duration;
@@ -11,7 +12,7 @@ use std::time::Duration;
 /// Base input item that is used to process the HDR merge
 #[derive(Clone)]
 pub struct HDRInput {
-    image: DynamicImage,
+    buffer: Array3<f32>,
     exposure: f32,
     gain: f32,
 }
@@ -60,7 +61,7 @@ impl HDRInput {
         let format = image::ImageFormat::from_path(path).ok();
         let image = read_image(&data, format)?;
 
-        Self::with_image(image, exposure, gain)
+        Self::with_image(&image, exposure, gain)
     }
 
     ///
@@ -76,7 +77,7 @@ impl HDRInput {
     ///
     /// - invalid gain
     /// - invalid exposure duration
-    pub fn with_image(image: DynamicImage, exposure: Duration, gain: f32) -> Result<Self, Error> {
+    pub fn with_image(image: &DynamicImage, exposure: Duration, gain: f32) -> Result<Self, Error> {
         if gain.is_infinite() || gain.is_nan() || gain <= 0. {
             return Err(Error::InputError {
                 parameter_name: "gain".to_string(),
@@ -92,8 +93,38 @@ impl HDRInput {
             });
         }
 
+        let buffer = match image {
+            DynamicImage::ImageLuma8(_)
+            | DynamicImage::ImageLumaA8(_)
+            | DynamicImage::ImageLuma16(_)
+            | DynamicImage::ImageLumaA16(_) => {
+                let mut buffer =
+                    Array3::<f32>::zeros((image.height() as usize, image.width() as usize, 1));
+
+                for (x, y, pixel) in image.to_luma32f().enumerate_pixels() {
+                    buffer[[y as usize, x as usize, 0]] = pixel.0[0];
+                }
+
+                buffer
+            }
+            _ => {
+                let mut buffer =
+                    Array3::<f32>::zeros((image.height() as usize, image.width() as usize, 3));
+
+                for (x, y, pixel) in image.to_rgb32f().enumerate_pixels() {
+                    let [red, green, blue] = pixel.0;
+
+                    buffer[[y as usize, x as usize, 0]] = red;
+                    buffer[[y as usize, x as usize, 1]] = green;
+                    buffer[[y as usize, x as usize, 2]] = blue;
+                }
+
+                buffer
+            }
+        };
+
         Ok(Self {
-            image,
+            buffer,
             exposure: exposure.as_secs_f32(),
             gain,
         })
@@ -113,8 +144,14 @@ impl HDRInput {
 
     /// Get underlying image data for the input item
     #[must_use]
-    pub fn get_image(&self) -> &DynamicImage {
-        &self.image
+    pub fn get_buffer(&self) -> &Array3<f32> {
+        &self.buffer
+    }
+
+    /// Get underlying image data for the input item
+    #[must_use]
+    pub fn get_buffer_mut(&mut self) -> &mut Array3<f32> {
+        &mut self.buffer
     }
 }
 
@@ -129,7 +166,7 @@ impl TryFrom<&Path> for HDRInput {
         let exposure = get_exposures(&exif)?;
         let gain = get_gains(&exif)?;
 
-        Self::with_image(image, Duration::from_secs_f32(exposure), gain)
+        Self::with_image(&image, Duration::from_secs_f32(exposure), gain)
     }
 }
 
@@ -147,6 +184,12 @@ impl HDRInputList {
     #[must_use]
     pub fn as_slice(&self) -> &[HDRInput] {
         &self.0
+    }
+
+    /// Get list of [`HDRInput`] as a slice.
+    #[must_use]
+    pub fn as_slice_mut(&mut self) -> &mut [HDRInput] {
+        &mut self.0
     }
 
     /// Returns the number of elements in the list
