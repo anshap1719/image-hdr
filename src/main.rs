@@ -8,7 +8,8 @@ fn main() {
         "DSC00002.jpeg".to_string(),
         "DSC00003.jpeg".to_string(),
     ];
-    let hdr_merge = hdr_merge_images(HDRInputList::try_from(paths.as_slice()).unwrap()).unwrap();
+    let hdr_merge =
+        hdr_merge_images(&mut HDRInputList::try_from(paths.as_slice()).unwrap()).unwrap();
     let stretched = apply_histogram_stretch(&hdr_merge).unwrap();
 
     stretched

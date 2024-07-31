@@ -43,31 +43,38 @@ fn main() -> Result<(), Error> {
         if !std::path::Path::exists(file_name.as_ref()) {
             let mut response = reqwest::blocking::get(url)?;
             println!("Downloading image: {url}");
+
             let _ = response.read_to_end(&mut buf)?;
             // we ignore failing to cache the image
             let _ = std::fs::write(file_name, &buf);
         } else {
             println!("Using cached image: {url}");
+
             let _ = std::fs::File::open(file_name)?.read_to_end(&mut buf)?;
         }
 
         let exif = get_exif_data(&buf)?;
         let gains = get_gains(&exif).unwrap_or(1.0);
         let exposure = get_exposures(&exif).unwrap_or(exposure);
+
         println!("Loading image: {url}");
+
         let image = image::load_from_memory_with_format(&buf, image::ImageFormat::Jpeg)?;
+
         println!("Adding image: {url}");
         dbg!(gains, exposure);
+
         images.push(HDRInput::with_image(
-            image,
+            &image,
             Duration::from_secs_f32(exposure),
             gains,
         )?);
+
         buf.clear()
     }
 
     println!("Mergin images...");
-    let hdr_merged = image_hdr::hdr_merge_images(&images.into())?;
+    let hdr_merged = image_hdr::hdr_merge_images(&mut images.into())?;
     let stretched = apply_histogram_stretch(&hdr_merged)?;
 
     println!("Saving merged image...");
