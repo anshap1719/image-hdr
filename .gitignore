@@ -4,3 +4,5 @@
 *.jpeg
 *.tiff
 *.tif
+.DS_Store
+*/.DS_Store
