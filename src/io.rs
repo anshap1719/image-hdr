@@ -10,14 +10,22 @@ use image::DynamicImage;
 ///
 /// # Errors
 /// If image cannot be read
-pub(crate) fn read_image(path: &String) -> Result<DynamicImage, Error> {
-    match image::open(path) {
+pub(crate) fn read_image(
+    data: &[u8],
+    format: Option<image::ImageFormat>,
+) -> Result<DynamicImage, Error> {
+    let load_result = match format {
+        Some(format) => image::load_from_memory_with_format(data, format),
+        None => image::load_from_memory(data),
+    };
+
+    match load_result {
         Ok(image) => Ok(image),
         Err(_err) => {
             #[cfg(not(feature = "read-raw-image"))]
             return Err(_err.into());
             #[cfg(feature = "read-raw-image")]
-            Ok(read_raw_image(path)?)
+            Ok(read_raw_image(data)?)
         }
     }
 }
@@ -26,12 +34,12 @@ pub(crate) fn read_image(path: &String) -> Result<DynamicImage, Error> {
 /// All formats and cameras supported by rawloader crate
 /// [rawloader](https://github.com/pedrocr/rawloader) are supported.
 #[cfg(feature = "read-raw-image")]
-pub(crate) fn read_raw_image(path: &String) -> Result<DynamicImage, Error> {
+pub(crate) fn read_raw_image(data: &[u8]) -> Result<DynamicImage, Error> {
     use crate::error::{RawPipelineError, UnknownError};
     use image::{ImageBuffer, Rgb};
     use imagepipe::{ImageSource, Pipeline};
 
-    let raw = rawloader::decode_file(path)?;
+    let raw = rawloader::decode(&mut std::io::Cursor::new(data))?;
 
     let source = ImageSource::Raw(raw);
     let mut pipeline = Pipeline::new_from_source(source).map_err(RawPipelineError::from)?;
