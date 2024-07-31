@@ -1,13 +1,10 @@
 //! An implementation of HDR merging via "Poisson Photon Noise Estimator" as introduced in
 //! [Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration](https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf)
 
+use crate::input::HDRInput;
 use ndarray::array;
 use ndarray::prelude::*;
 use rayon::prelude::*;
-
-use crate::error::UnknownError;
-use crate::input::HDRInput;
-use crate::Error;
 
 const RED_COEFFICIENT: f32 = 1.;
 const GREEN_COEFFICIENT: f32 = 1.;
@@ -30,7 +27,7 @@ const BLUE_COEFFICIENT: f32 = 1.;
 pub(crate) fn calculate_poisson_estimate(inputs: &mut [HDRInput]) -> Array3<f32> {
     inputs.par_iter_mut().for_each(|input| {
         let scaling_factor = input.get_exposure() * input.get_gain();
-        let mut input_buffer = input.get_buffer_mut();
+        let input_buffer = input.get_buffer_mut();
 
         if let (_, _, 1) = input_buffer.dim() {
             *input_buffer /= scaling_factor;
@@ -58,7 +55,6 @@ pub(crate) fn calculate_poisson_estimate(inputs: &mut [HDRInput]) -> Array3<f32>
 
             radiance
         })
-        .into_par_iter()
         .reduce(
             || Array3::<f32>::zeros(shape),
             |acc, radiance| acc + radiance,

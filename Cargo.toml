@@ -35,3 +35,8 @@ image = { version = "0.25.0", features = ["jpeg"] }
 [features]
 default = ["read-raw-image"]
 read-raw-image = ["dep:imagepipe", "dep:rawloader"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"

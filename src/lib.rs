@@ -13,6 +13,7 @@
 
 use image::{DynamicImage, GenericImageView, ImageBuffer, Luma, Rgb};
 use poisson::calculate_poisson_estimate;
+use std::time::Instant;
 
 pub mod error;
 pub mod exif;
