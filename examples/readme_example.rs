@@ -38,19 +38,22 @@ fn main() -> Result<(), Error> {
     let mut images = Vec::with_capacity(image_urls.len());
     let mut buf = Vec::new();
     for (url, exposure) in image_urls {
-        let file_name = url.split("/").last().unwrap();
+        let file_name = url
+            .split('/')
+            .last()
+            .expect("Expected filename as last component in url");
 
-        if !std::path::Path::exists(file_name.as_ref()) {
+        if std::path::Path::exists(file_name.as_ref()) {
+            println!("Using cached image: {url}");
+
+            let _ = std::fs::File::open(file_name)?.read_to_end(&mut buf)?;
+        } else {
             let mut response = reqwest::blocking::get(url)?;
             println!("Downloading image: {url}");
 
             let _ = response.read_to_end(&mut buf)?;
             // we ignore failing to cache the image
             let _ = std::fs::write(file_name, &buf);
-        } else {
-            println!("Using cached image: {url}");
-
-            let _ = std::fs::File::open(file_name)?.read_to_end(&mut buf)?;
         }
 
         let exif = get_exif_data(&buf)?;
@@ -70,7 +73,7 @@ fn main() -> Result<(), Error> {
             gains,
         )?);
 
-        buf.clear()
+        buf.clear();
     }
 
     println!("Mergin images...");
