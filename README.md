@@ -1,20 +1,24 @@
-# image-hdr
+# image-hdr ![](https://github.com/anshap1719/image-hdr/actions/workflows/rust.yml/badge.svg)
 
-This is a rust library which implements the HDR merging algorithm for camera images taken with different exposure times (or with bracketing). It uses the algorithms described in https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf, and uses "Poisson Photon Noise Estimator" equations to estimate final radiances at each pixel position.
+This is a rust library which implements the HDR merging algorithm for camera images taken with different exposure
+times (or with bracketing). It uses the algorithms described
+in https://www.cl.cam.ac.uk/research/rainbow/projects/noise-aware-merging/2020-ppne-mle.pdf, and uses "Poisson Photon
+Noise Estimator" equations to estimate final radiances at each pixel position.
 
 ## Current State
 
-The library is still in early stages of development, but aims to provide a crate that can handle all HDR merging needs. Towards that end, the following todos are the top priority:
+The library is still in early stages of development, but aims to provide a crate that can handle all HDR merging needs.
+Towards that end, the following todos are the top priority:
 
--   Tone mapping algorithm implementations.
--   Improve performance.
+- Tone mapping algorithm implementations.
+- Improve performance.
 
 ## Dependencies
 
--   image-rs: Uses DynamicImage as the output format and storage format between calculations.
--   rawloader: For supporting RAW image formats.
--   rayon: For doing point calculations in parallel.
--   kamadak-exif: For getting image's metadata, specifically exposure time and gain (ISO).
+- image-rs: Uses DynamicImage as the output format and storage format between calculations.
+- rawloader: For supporting RAW image formats.
+- rayon: For doing point calculations in parallel.
+- kamadak-exif: For getting image's metadata, specifically exposure time and gain (ISO).
 
 ## Usage
 
@@ -51,4 +55,5 @@ Bug reports and pull requests welcome at https://github.com/anshap1719/image-hdr
 
 ## Citations
 
--   Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration by Param Hanji, Fangcheng Zhong, and Rafa l K. Mantiuk (https://www.cl.cam.ac.uk/~rkm38/pdfs/hanji2020_noise_aware_HDR_merging.pdf)
+- Noise-Aware Merging of High Dynamic Range Image Stacks without Camera Calibration by Param Hanji, Fangcheng Zhong, and
+  Rafa l K. Mantiuk (https://www.cl.cam.ac.uk/~rkm38/pdfs/hanji2020_noise_aware_HDR_merging.pdf)
