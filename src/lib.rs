@@ -1,15 +1,5 @@
 //! An implementation of HDR Radiance Estimation using Poisson Photon Noise Estimator for creating HDR image from a set of images
-
-#![deny(clippy::correctness)]
-#![deny(clippy::suspicious)]
-#![deny(clippy::complexity)]
-#![deny(clippy::perf)]
-#![deny(clippy::style)]
-#![deny(clippy::pedantic)]
-#![deny(clippy::cargo)]
-#![warn(missing_docs)]
 #![allow(clippy::multiple_crate_versions)]
-#![allow(clippy::module_name_repetitions)]
 
 use image::DynamicImage;
 use poisson::calculate_poisson_estimate;

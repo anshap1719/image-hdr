@@ -42,7 +42,12 @@ pub(crate) fn calculate_poisson_estimate(inputs: &mut [HDRInput]) -> Array3<f32>
         }
     });
 
-    let shape = inputs.first().unwrap().get_buffer().dim();
+    let shape = inputs
+        .first()
+        .unwrap_or_else(|| panic!("Expected at least 1 input image"))
+        .get_buffer()
+        .dim();
+
     let sum_exposures: f32 = inputs.iter().map(HDRInput::get_exposure).sum();
 
     let normalized_radiances = inputs
