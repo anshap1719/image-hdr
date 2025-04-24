@@ -16,7 +16,7 @@ crate-type = ["cdylib", "rlib"]
 bench = false
 
 [dependencies]
-image = "0.25.2"
+image = { version = "0.25.2", default-features = false }
 rayon = "1.10"
 kamadak-exif = "0.5.5"
 rawloader = { version = "0.37", optional = true }
@@ -26,7 +26,10 @@ ndarray = { version = "0.16.1", features = ["rayon"] }
 
 [dev-dependencies]
 reqwest = { version = "0.12.7", features = ["blocking"] }
-image = { version = "0.25.2", features = ["jpeg", "tiff"] }
+image = { version = "0.25.2", default-features = false, features = [
+    "jpeg",
+    "tiff",
+] }
 
 [features]
 default = ["read-raw-image"]
