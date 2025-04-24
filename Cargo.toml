@@ -16,17 +16,17 @@ crate-type = ["cdylib", "rlib"]
 bench = false
 
 [dependencies]
-image = { version = "0.25.2", default-features = false }
+image = { version = "0.25.6", default-features = false }
 rayon = "1.10"
-kamadak-exif = "0.5.5"
+kamadak-exif = "0.6.1"
 rawloader = { version = "0.37", optional = true }
 imagepipe = { version = "0.5", optional = true }
-thiserror = "1.0.63"
+thiserror = "2.0.12"
 ndarray = { version = "0.16.1", features = ["rayon"] }
 
 [dev-dependencies]
-reqwest = { version = "0.12.7", features = ["blocking"] }
-image = { version = "0.25.2", default-features = false, features = [
+reqwest = { version = "0.12.15", features = ["blocking"] }
+image = { version = "0.25.6", default-features = false, features = [
     "jpeg",
     "tiff",
 ] }
