@@ -40,7 +40,7 @@ fn main() -> Result<(), Error> {
     for (url, exposure) in image_urls {
         let file_name = url
             .split('/')
-            .last()
+            .next_back()
             .expect("Expected filename as last component in url");
 
         if std::path::Path::exists(file_name.as_ref()) {
