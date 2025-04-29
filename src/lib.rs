@@ -9,6 +9,7 @@ pub mod exif;
 pub mod extensions;
 pub mod input;
 mod io;
+mod mtf;
 mod poisson;
 pub mod stretch;
 
