@@ -37,17 +37,17 @@ stretched
 
 ### Given the following 3 exposures:
 
-![alt "1/640s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00001+Large.jpeg)
-![alt "1/4000s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00002+Large.jpeg)
-![alt "1/80s"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/DSC00003+Large.jpeg)
+![alt "1/640s"](https://github.com/user-attachments/assets/476fc627-fcf3-480c-9dc4-b9c868bf8462)
+![alt "1/4000s"](https://github.com/user-attachments/assets/3ed11fd1-2ab0-494c-8c7f-d5216e40cd4e)
+![alt "1/80s"](https://github.com/user-attachments/assets/bbb01cd8-91c3-4431-854b-318eeaa07ad0)
 
 ### Resulting unprocessed image:
 
-![alt "Merged image"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/hdr_merged+Large.jpeg)
+![alt "Merged image"](https://github.com/user-attachments/assets/f19b5234-e2e6-447d-a05e-25389ca38d39)
 
 ### After basic processing (Levels and Contrast):
 
-![alt "Processed image"](https://image-hdr-assets.s3.ap-south-1.amazonaws.com/Processed+Large.jpeg)
+![alt "Processed image"](https://github.com/user-attachments/assets/f2214838-8990-497f-8448-a2da1d368211)
 
 ## Contributing
 
